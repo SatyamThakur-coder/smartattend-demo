@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartAttend Demo - Dual Mode Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 120px 0 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="90" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h2 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.9s both;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .main-content {
+            background: white;
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: #2d3748;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .demo-section {
+            background: #f7fafc;
+            text-align: center;
+        }
+
+        .demo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #667eea;
+        }
+
+        .demo-interface {
+            background: #2d3748;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 1rem 0;
+            color: white;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .camera-view {
+            background: #000;
+            border-radius: 10px;
+            height: 200px;
+            margin-bottom: 1rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #667eea;
+        }
+
+        .face-outline {
+            width: 120px;
+            height: 140px;
+            border: 3px solid #48bb78;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .rfid-reader {
+            background: linear-gradient(135deg, #4a5568, #2d3748);
+            border-radius: 15px;
+            height: 150px;
+            margin-bottom: 1rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #667eea;
+        }
+
+        .rfid-card {
+            width: 80px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            position: relative;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .rfid-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-display {
+            background: #1a202c;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #48bb78;
+        }
+
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0.5rem;
+        }
+
+        .demo-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+
+        .attendance-log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #1a202c;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #4a5568;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e53e3e;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .online {
+            background: #38a169;
+            color: white;
+        }
+
+        .offline {
+            background: #e53e3e;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo" onclick="scrollToTop()">SmartAttend</div>
+            <ul class="nav-links">
+                <li><a href="#demo">Live Demo</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#stats">Statistics</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>SmartAttend Demo</h1>
+                <h2>Experience Dual-Mode Attendance Technology</h2>
+                <p>Interactive demonstration of Facial Recognition + RFID attendance system with real-time processing</p>
+                <div class="cta-buttons">
+                    <a href="#demo" class="btn btn-primary">Try Live Demo</a>
+                    <a href="#" class="btn btn-secondary" onclick="openModal('videoModal')">Watch Tutorial</a>
+                    <a href="#stats" class="btn btn-secondary">View Analytics</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <section id="demo" class="section demo-section">
+            <div class="container">
+                <h2>🚀 Interactive Demo</h2>
+                <p style="text-align: center; font-size: 1.2rem; margin-bottom: 2rem;">Experience both facial recognition and RFID attendance modes in real-time</p>
+                
+                <div class="demo-container">
+                    <!-- Facial Recognition Demo -->
+                    <div class="demo-card">
+                        <h3>📷 Facial Recognition Mode</h3>
+                        <div class="demo-interface">
+                            <div class="connection-status" id="faceStatus">🔴 OFFLINE</div>
+                            <div class="live-indicator">● LIVE</div>
+                            <div class="camera-view" id="cameraView">
+                                <div class="face-outline" id="faceOutline"></div>
+                            </div>
+                            <div style="text-align: center; margin-bottom: 1rem;">
+                                <button class="demo-btn" onclick="startFaceRecognition()">Start Recognition</button>
+                                <button class="demo-btn" onclick="simulateFaceDetection()">Simulate Detection</button>
+                                <button class="demo-btn" onclick="toggleConnection('face')">Toggle Connection</button>
+                            </div>
+                            <div class="status-display" id="faceStatusDisplay">
+                                System ready. Click "Start Recognition" to begin...
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number" id="faceAccuracy">99%</span>
+                                <small>Accuracy</small>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number" id="faceSpeed">0.3s</span>
+                                <small>Avg Time</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RFID Demo -->
+                    <div class="demo-card">
+                        <h3>📱 RFID Attendance Mode</h3>
+                        <div class="demo-interface">
+                            <div class="connection-status" id="rfidStatus">🔴 OFFLINE</div>
+                            <div class="live-indicator">● ACTIVE</div>
+                            <div class="rfid-reader" id="rfidReader">
+                                <div class="rfid-card" id="rfidCard" onclick="simulateRFIDTap()"></div>
+                            </div>
+                            <div style="text-align: center; margin-bottom: 1rem;">
+                                <button class="demo-btn" onclick="activateRFID()">Activate Reader</button>
+                                <button class="demo-btn" onclick="simulateRFIDTap()">Tap Card</button>
+                                <button class="demo-btn" onclick="toggleConnection('rfid')">Toggle Connection</button>
+                            </div>
+                            <div class="status-display" id="rfidStatusDisplay">
+                                RFID reader ready. Tap a card to record attendance...
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number" id="rfidReliability">100%</span>
+                                <small>Reliability</small>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number" id="rfidSpeed">0.1s</span>
+                                <small>Response</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Log -->
+                <div style="margin-top: 4rem; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <h3 style="text-align: center; color: #2d3748; margin-bottom: 2rem;">📊 Live Attendance Log</h3>
+                    <div class="attendance-log" id="attendanceLog">
+                        <div class="log-entry">
+                            <span>System initialized</span>
+                            <span id="currentTime"></span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <button class="demo-btn" onclick="clearLog()">Clear Log</button>
+                        <button class="demo-btn" onclick="exportLog()">Export Data</button>
+                        <button class="demo-btn" onclick="generateReport()">Generate Report</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stats" class="section" style="background: #2d3748; color: white;">
+            <div class="container">
+                <h2 style="color: white;">📈 Real-Time Analytics</h2>
+                <div class="stats-grid" style="margin-top: 3rem;">
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalAttendance">247</span>
+                        <small>Total Check-ins Today</small>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="faceRecognitions">156</span>
+                        <small>Face Recognitions</small>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="rfidScans">91</span>
+                        <small>RFID Scans</small>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="offlineSync">23</span>
+                        <small>Offline Syncs</small>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="avgProcessing">0.2s</span>
+                        <small>Avg Processing</small>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="systemUptime">99.8%</span>
+                        <small>System Uptime</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+            <div class="container">
+                <h2 style="color: white;">Ready to Implement?</h2>
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">Contact us for a customized solution for your institution</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary" onclick="openModal('contactModal')">Schedule Demo</a>
+                    <a href="#" class="btn btn-secondary" onclick="openModal('quoteModal')">Get Quote</a>
+                    <a href="#" class="btn btn-secondary" onclick="downloadBrochure()">Download Brochure</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('videoModal')">&times;</span>
+            <h2>Tutorial Video</h2>
+            <p>Watch how our dual-mode attendance system works in real educational environments.</p>
+            <div style="background: #f0f0f0; padding: 2rem; border-radius: 10px; text-align: center; margin: 1rem 0;">
+                <p>🎥 Video Player Placeholder</p>
+                <p style="font-size: 0.9rem; color: #666;">Tutorial covering setup, usage, and administration</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('contactModal')">&times;</span>
+            <h2>Schedule a Demo</h2>
+            <form style="margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label>Institution Name:</label><br>
+                    <input type="text" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Contact Email:</label><br>
+                    <input type="email" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Number of Students:</label><br>
+                    <select style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                        <option>< 100</option>
+                        <option>100 - 500</option>
+                        <option>500 - 1000</option>
+                        <option>> 1000</option>
+                    </select>
+                </div>
+                <button type="submit" class="demo-btn" style="width: 100%;">Schedule Demo</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="quoteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('quoteModal')">&times;</span>
+            <h2>Get Custom Quote</h2>
+            <div style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                <h4>Pricing Estimates:</h4>
+                <div style="margin: 1rem 0;">
+                    <strong>Basic Package (RFID Only):</strong> $2,500 - $5,000<br>
+                    <small>• Up to 500 students • Basic reporting • Local storage</small>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <strong>Advanced Package (Facial Recognition):</strong> $8,000 - $15,000<br>
+                    <small>• Up to 1000 students • AI processing • Cloud sync</small>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <strong>Premium Package (Dual Mode):</strong> $12,000 - $25,000<br>
+                    <small>• Unlimited students • Full features • 24/7 support</small>
+                </div>
+            </div>
+            <button class="demo-btn" style="width: 100%;" onclick="alert('Quote request submitted!')">Request Detailed Quote</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let faceRecognitionActive = false;
+        let rfidReaderActive = false;
+        let faceOnline = false;
+        let rfidOnline = false;
+        let attendanceCount = 0;
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            
+            // Animate statistics
+            animateCounters();
+            setInterval(animateCounters, 30000);
+        });
+
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Facial Recognition Functions
+        function startFaceRecognition() {
+            faceRecognitionActive = true;
+            document.getElementById('faceStatusDisplay').innerHTML = '🔍 Scanning for faces... Please look at the camera.';
+            document.getElementById('faceOutline').style.borderColor = '#f6ad55';
+            
+            setTimeout(() => {
+                if (faceRecognitionActive) {
+                    document.getElementById('faceStatusDisplay').innerHTML = '✅ Ready for recognition. Face detection active.';
+                    document.getElementById('faceOutline').style.borderColor = '#48bb78';
+                }
+            }, 2000);
+        }
+
+        function simulateFaceDetection() {
+            if (!faceRecognitionActive) {
+                startFaceRecognition();
+                setTimeout(simulateFaceDetection, 2500);
+                return;
+            }
+
+            const names = ['John Smith', 'Emma Johnson', 'Michael Chen', 'Sarah Davis', 'Alex Rodriguez'];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const confidence = (95 + Math.random() * 4).toFixed(1);
+            
+            document.getElementById('faceOutline').style.borderColor = '#667eea';
+            document.getElementById('faceStatusDisplay').innerHTML = `🎯 Analyzing face...`;
+            
+            setTimeout(() => {
+                document.getElementById('faceStatusDisplay').innerHTML = 
+                    `✅ Recognition successful!<br>Student: <strong>${randomName}</strong><br>Confidence: ${confidence}%<br>Status: Present`;
+                document.getElementById('faceOutline').style.borderColor = '#48bb78';
+                
+                addToAttendanceLog(`Face Recognition: ${randomName} (${confidence}%)`, 'face');
+                updateStats('face');
+            }, 1500);
+        }
+
+        // RFID Functions
+        function activateRFID() {
+            rfidReaderActive = true;
+            document.getElementById('rfidStatusDisplay').innerHTML = '📡 RFID reader activated. Waiting for card tap...';
+        }
+
+        function simulateRFIDTap() {
+            if (!rfidReaderActive) {
+                activateRFID();
+            }
+
+            const cardIds = ['STU001', 'STU045', 'STU078', 'STU123', 'STU156'];
+            const names = ['David Wilson', 'Lisa Parker', 'James Brown', 'Maria Garcia', 'Tom Anderson'];
+            const randomIndex = Math.floor(Math.random() * cardIds.length);
+            const cardId = cardIds[randomIndex];
+            const studentName = names[randomIndex];
+            
+            // Animate card tap
+            document.getElementById('rfidCard').style.transform = 'translateY(-10px) scale(1.1)';
+            document.getElementById('rfidStatusDisplay').innerHTML = '📖 Reading card data...';
+            
+            setTimeout(() => {
+                document.getElementById('rfidCard').style.transform = 'translateY(0) scale(1)';
+                document.getElementById('rfidStatusDisplay').innerHTML = 
+                    `✅ Card read successful!<br>Card ID: <strong>${cardId}</strong><br>Student: <strong>${studentName}</strong><br>Status: Present`;
+                
+                addToAttendanceLog(`RFID Scan: ${studentName} (${cardId})`, 'rfid');
+                updateStats('rfid');
+            }, 1000);
+        }
+
+        // Connection toggle functions
+        function toggleConnection(type) {
+            if (type === 'face') {
+                faceOnline = !faceOnline;
+                const statusElement = document.getElementById('faceStatus');
+                statusElement.textContent = faceOnline ? '🟢 ONLINE' : '🔴 OFFLINE';
+                statusElement.className = faceOnline ? 'connection-status online' : 'connection-status offline';
+                
+                if (!faceOnline) {
+                    setTimeout(() => {
+                        if (!faceOnline) {
+                            addToAttendanceLog('Face recognition data synced to cloud', 'sync');
+                        }
+                    }, 5000);
+                }
+            } else if (type === 'rfid') {
+                rfidOnline = !rfidOnline;
+                const statusElement = document.getElementById('rfidStatus');
+                statusElement.textContent = rfidOnline ? '🟢 ONLINE' : '🔴 OFFLINE';
+                statusElement.className = rfidOnline ? 'connection-status online' : 'connection-status offline';
+                
+                if (!rfidOnline) {
+                    setTimeout(() => {
+                        if (!rfidOnline) {
+                            addToAttendanceLog('RFID attendance data synced to cloud', 'sync');
+                        }
+                    }, 5000);
+                }
+            }
+        }
+
+        // Attendance log functions
+        function addToAttendanceLog(message, type) {
+            const log = document.getElementById('attendanceLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const icon = type === 'face' ? '👤' : type === 'rfid' ? '📱' : '🔄';
+            entry.innerHTML = `
+                <span>${icon} ${message}</span>
+                <span>${new Date().toLocaleTimeString()}</span>
+            `;
+            
+            log.insertBefore(entry, log.firstChild);
+            
+            // Keep only last 10 entries
+            if (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+            
+            attendanceCount++;
+        }
+
+        function clearLog() {
+            const log = document.getElementById('attendanceLog');
+            log.innerHTML = '<div class="log-entry"><span>Log cleared</span><span>' + new Date().toLocaleTimeString() + '</span></div>';
+        }
+
+        function exportLog() {
+            alert('📊 Attendance data exported to CSV format!\n\nFile saved as: attendance_' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+
+        function generateReport() {
+            alert('📈 Generating comprehensive attendance report...\n\n✅ Report will include:\n• Daily attendance statistics\n• Recognition accuracy metrics\n• System performance data\n• Offline sync logs');
+        }
+
+        // Statistics functions
+        function updateStats(type) {
+            if (type === 'face') {
+                const current = parseInt(document.getElementById('faceRecognitions').textContent);
+                document.getElementById('faceRecognitions').textContent = current + 1;
+            } else if (type === 'rfid') {
+                const current = parseInt(document.getElementById('rfidScans').textContent);
+                document.getElementById('rfidScans').textContent = current + 1;
+            }
+            
+            const total = parseInt(document.getElementById('totalAttendance').textContent);
+            document.getElementById('totalAttendance').textContent = total + 1;
+        }
+
+        function animateCounters() {
+            // Simulate live statistics updates
+            const elements = ['totalAttendance', 'faceRecognitions', 'rfidScans', 'offlineSync'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                const current = parseInt(element.textContent);
+                const increment = Math.floor(Math.random() * 3);
+                element.textContent = current + increment;
+            });
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function downloadBrochure() {
+            alert('📄 SmartAttend System Brochure\n\nDownloading comprehensive product information...\n\n✅ Includes:\n• Technical specifications\n• Implementation guide\n• Pricing options\n• Case studies');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = '0 2px 30px rgba(0, 0, 0, 0.15)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            }
+        });
+    </script>
+</body>
+</html>
